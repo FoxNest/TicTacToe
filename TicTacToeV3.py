@@ -1,11 +1,17 @@
+'''
+Author: Dylan Fox 12-1-21
+
+ASCII/Console based TicTacToe game that implements the MiniMax algorithm for 1 player game mode
+'''
+
 import random
 import os
-import time
-# DYLAN FOX 12-1-21
-# V3 will include choice between 1 or 2 player and if 1 player - will use MiniMax algorithm to incorprate AI
 
 # GLOBAL CONSOLE COLOR VARIABLES
-W  = '\033[0m'  # white (normal)
+from colorama import init
+init()
+
+W  = '\033[0m'  # white (default)
 R  = '\033[31m' # red
 G  = '\033[32m' # green
 O  = '\033[33m' # orange
@@ -42,16 +48,16 @@ def player_move(board, marker): # GETS AND PROCESSES PLAYER MOVE
     while True:
         playerChoice = input('Player {} make your move! '.format(marker))
         
-        if playerChoice.isdigit() and int(playerChoice) in range (1,10):
+        if playerChoice.isdigit() and int(playerChoice) in range(1,10):
             playerChoice = int(playerChoice) # CONVERTS INPUT TO INT
             
             if check_space(board, playerChoice):
                 board[playerChoice] = marker
                 return board
             else:
-                print('That space is already occupied.')
+                print(R + 'That space is already occupied.\n' + W)
         else:
-            print('Enter a valid digit 1-9.')
+            print(R +'Enter a valid digit 1-9.\n' + W)
 
 def check_space(board, pos): # CHECK TO VALIDATE SPACE IS OPEN
     return board[pos] == ' '
@@ -92,10 +98,6 @@ def minimax(board, depth, is_max_player, computer_marker='O', player_marker='X')
         return (score - depth)
     elif score == -10: # Minimizer win
         return (score + depth)
-
-    # TESTING
-    #print(f'Score: {score} Depth: {depth}')
-    #time.sleep(.5)
 
     if is_max_player:
         max_value = -1000
@@ -148,25 +150,33 @@ def introduction(board): # GAME INTO AND CHECKS IF 1 OR 2 PLAYERS
 
             if num_of_players in range(1, 3):
                 break
+            else:
+                print(R + 'Enter a value of 1 or 2.\n' + W)
         except:
-            print(R + 'Enter a value of 1 or 2.\n' + W) # RED TEXT
+            print(R + 'Enter a value of 1 or 2.\n' + W)
 
+    # STARTS GAME
     if num_of_players == 1:
-        game_logic_1_player(board)
-    elif num_of_players == 2:
-        game_logic_2_player(board) # Starts game
+        while True:
+            first_choice = input('Press 1 if you want to go first or 2 for the AI: ')
+            if first_choice.isdigit() and int(first_choice) in range(1,3):
+                game_logic_1_player(board, int(first_choice))
+            else:
+                print(R + 'Enter a valid option.\n' + W)
 
-def game_logic_1_player(board): # MAIN LOGIC CONTROLLER - for 1 player game
+    elif num_of_players == 2:
+        game_logic_2_player(board) 
+
+def game_logic_1_player(board, turn): # MAIN LOGIC CONTROLLER - for 1 player game
     # VARIABLES 
     player_marker, computer_marker = 'X', 'O'
-    turn = 1 # Controls current turn - 1 = player | 2 = computer
 
+    draw_board(board) # Draws inital game board
     while True:
 
         # Players turn
         if turn == 1:
             # Proccess player move & updates board
-            draw_board(board)
             player_move(board, player_marker)
             draw_board(board)
             
@@ -242,12 +252,16 @@ def game_logic_2_player(board): # MAIN LOGIC CONTROLLER - for 2 player game
 def game_over(board):
     while True:
         keepPlaying = input('Would you like to keep playing? Yes or No: ').lower()
-        if keepPlaying == 'yes':
+        if keepPlaying == 'yes' or keepPlaying == 'y':
             board = [' ']*10 # Resets game board
             introduction(board)
-        elif keepPlaying == 'no':
+        elif keepPlaying == 'no' or keepPlaying == 'n':
             exit()
         else:
             print('Please enter yes or no')
 
-introduction(board)        
+def main():
+    introduction(board)        
+
+if __name__ == "__main__":
+    main()
