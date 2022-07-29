@@ -1,6 +1,5 @@
 '''
 Author: Dylan Fox 12-1-21
-
 ASCII/Console based TicTacToe game that implements the MiniMax algorithm for 1 player game mode
 '''
 
@@ -27,6 +26,7 @@ board = [' ']*10
 #board = [' ', 'X', 'O', 'O', 'X', 'O', 'X', 'O', ' ', ' '] # AI WIN next move
 #board = [' ', ' ', 'X', ' ', 'O', 'X', ' ', ' ', ' ', ' '] # Move on 3 and player wins next move
 #board = [' ', 'X', 'O', ' ', 'X', 'O', 'O', ' ', 'X', ' '] # garunteed tie
+#board = [' ', 'O', 'X', 'O', 'O', 'X', 'X', 'X', ' ', 'O'] # AI must choose to tie game
 
 def check_draw(board): # CHECK FOR DRAW
     for i in range(1,10):
@@ -71,7 +71,7 @@ def marker_choice(): # ASKS AND ASSIGNS PLAYER SYMBOL
         elif playerInput == 'O':
             return 'O', 'X'
         else:
-            print('Please choose either X or O.')
+            print(R + 'Please choose either X or O.\n' + W)
         
 def draw_board(board): # DRAWS GAME BOARD   
     # PRINTS CURRENT GAME BOARD
@@ -170,6 +170,7 @@ def introduction(board): # GAME INTO AND CHECKS IF 1 OR 2 PLAYERS
 def game_logic_1_player(board, turn): # MAIN LOGIC CONTROLLER - for 1 player game
     # VARIABLES 
     player_marker, computer_marker = 'X', 'O'
+    tick = 0 # Tracks number of turns played
 
     draw_board(board) # Draws inital game board
     while True:
@@ -180,36 +181,47 @@ def game_logic_1_player(board, turn): # MAIN LOGIC CONTROLLER - for 1 player gam
             player_move(board, player_marker)
             draw_board(board)
             
-            # Checks for win/draw
-            if check_win(board, player_marker):
-                print('You Win!')
-                game_over(board)
-            elif check_draw(board):
-                print("It's a draw!")
-                game_over(board)
-            else:
-                turn = 2 # Passes turn to computer
+            # Checks for win/draw after 5th move
+            if tick >= 4:
+                if check_win(board, player_marker):
+                    print('You Win!')
+                    game_over(board)
+                elif check_draw(board):
+                    print("It's a draw!")
+                    game_over(board)
+            # Passes turn to computer
+            tick += 1
+            turn = 2 
 
         # Computers turn
         elif turn == 2:
-            move = find_best_move(board)
-            board[move] = computer_marker
+            if tick == 8: # If 8 moves have been played without a win AI will play only empty spot
+                for i in range(len(board)):
+                    if check_space(board, i):
+                        board[i] = computer_marker    
+            else: # If there are > 1 open space will use minimax to determine best move
+                move = find_best_move(board)
+                board[move] = computer_marker
+                
             draw_board(board)
-
             # Checks for win/draw
-            if check_win(board, computer_marker):
-                print('You Lose!')
-                game_over(board)
-            elif check_draw(board):
-                print("It's a draw!")
-                game_over(board)
-            else:
-                turn = 1 # Passes turn to player
+            if tick >= 4:
+                if check_win(board, computer_marker):
+                    print('You Lose!')
+                    game_over(board)
+                elif check_draw(board):
+                    print("It's a draw!")
+                    game_over(board)
+
+            # Passes turn to player
+            tick += 1
+            turn = 1
 
 
 def game_logic_2_player(board): # MAIN LOGIC CONTROLLER - for 2 player game
     # VARIABLES
     turn = random.randint(1,2) # CONTROLS PLAYER TURN 1, 2 FOR PLAYERS RESPECTIVELY | RANDOM START PLAYER
+    tick = 0 # Tracks number of turns played
     
     # PLAYER MARKER CHOICE
     player_1_marker, player_2_marker = marker_choice()
@@ -225,29 +237,37 @@ def game_logic_2_player(board): # MAIN LOGIC CONTROLLER - for 2 player game
         # ASK TO CHOOSE MOVE > CHECK SPACE > COMMIT CHANGE
             player_move(board, player_1_marker) 
             draw_board(board) # DRAWS BOARD AFTER MOVE           
-        # CHECK FOR WIN | TIE
-            if check_win(board, player_1_marker):
-                print('Player 1 is the winner!')
-                game_over(board)
-            elif check_draw(board):
-                print("It's a draw!")
-                game_over(board)
-            else:
-                turn = 2 ## PASSES TURN TO PLAYER 2
         
-        elif turn == 2: # PALYER 2
+        # Checks for win/draw after 5th move
+            if tick >= 4:
+                if check_win(board, player_1_marker):
+                    print('Player 1 is the winner!')
+                    game_over(board)
+                elif check_draw(board):
+                    print("It's a draw!")
+                    game_over(board)
+
+            ## PASSES TURN TO PLAYER 2
+            tick += 1
+            turn = 2
+        
+        elif turn == 2: # PLAYER 2
         # ASK TO CHOOSE MOVE > CHECK SPACE > COMMIT CHANGE
             player_move(board, player_2_marker)
             draw_board(board) # DRAWS BOARD AFTER MOVE 
-        # CHECK FOR WIN | TIE
-            if check_win(board, player_2_marker):
-                print('Player 2 is the winner!')
-                game_over(board)
-            elif check_draw(board):
-                print("It's a draw!")
-                game_over(board)
-            else:
-                turn = 1 ## PASSES TURN TO PLAYER 1
+
+            # Checks for win/draw after 5th move
+            if tick >= 4:
+                if check_win(board, player_2_marker):
+                    print('Player 2 is the winner!')
+                    game_over(board)
+                elif check_draw(board):
+                    print("It's a draw!")
+                    game_over(board)
+
+            ## PASSES TURN TO PLAYER 1
+            tick += 1
+            turn = 1
 
 def game_over(board):
     while True:
